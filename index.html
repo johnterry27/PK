@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistem Pakar - Diagnosis Tifus</title>
+    <style>
+        body { font-family: Arial, sans-serif; background-color: #f4f7f6; margin: 0; padding: 20px; }
+        .container { max-width: 600px; margin: auto; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 0 10px rgba(0,0,0,0.1); }
+        h2 { text-align: center; color: #333; }
+        .form-group { margin-bottom: 15px; }
+        label { display: block; margin-bottom: 5px; font-weight: bold; }
+        input[type="number"] { width: 100%; padding: 8px; box-sizing: border-box; border: 1px solid #ccc; border-radius: 4px; }
+        button { width: 100%; padding: 10px; background-color: #28a745; color: white; border: none; border-radius: 4px; font-size: 16px; cursor: pointer; margin-top: 10px;}
+        button:hover { background-color: #218838; }
+        .result-box { margin-top: 20px; padding: 15px; border: 1px solid #ddd; border-radius: 4px; background-color: #f9f9f9; display: none; }
+        .diagnosa-tifus { color: red; font-weight: bold; }
+        .diagnosa-aman { color: green; font-weight: bold; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h2>Sistem Pakar Diagnosis Tifus</h2>
+    <p>Masukkan nilai kepastian gejala (0.0 sampai 1.0)</p>
+
+    <div class="form-group">
+        <label>Demam Tinggi (Aturan 1)</label>
+        <input type="number" id="demam" min="0" max="1" step="0.1" value="0.9">
+    </div>
+    <div class="form-group">
+        <label>Sakit Perut (Aturan 1)</label>
+        <input type="number" id="sakitPerut" min="0" max="1" step="0.1" value="0.6">
+    </div>
+    <hr>
+    <div class="form-group">
+        <label>Lemas (Aturan 2)</label>
+        <input type="number" id="lemas" min="0" max="1" step="0.1" value="0.7">
+    </div>
+    <div class="form-group">
+        <label>Mual (Aturan 2)</label>
+        <input type="number" id="mual" min="0" max="1" step="0.1" value="0.8">
+    </div>
+    <div class="form-group">
+        <label>Tidak Nafsu Makan (Aturan 2)</label>
+        <input type="number" id="nafsuMakan" min="0" max="1" step="0.1" value="0.6">
+    </div>
+
+    <button onclick="hitungCF()">Hitung Diagnosis</button>
+
+    <div class="result-box" id="hasilBox">
+        <h3 style="margin-top:0;">Hasil Perhitungan:</h3>
+        <p id="rincian"></p>
+        <h3 id="kesimpulan"></h3>
+    </div>
+</div>
+
+<script>
+    function hitungCF() {
+        // Ambil Nilai Input
+        let demam = parseFloat(document.getElementById('demam').value) || 0;
+        let sakitPerut = parseFloat(document.getElementById('sakitPerut').value) || 0;
+        let lemas = parseFloat(document.getElementById('lemas').value) || 0;
+        let mual = parseFloat(document.getElementById('mual').value) || 0;
+        let nafsuMakan = parseFloat(document.getElementById('nafsuMakan').value) || 0;
+
+        // Aturan 1: CF = 0.8
+        let minGejala1 = Math.min(demam, sakitPerut);
+        let cf1 = minGejala1 * 0.8;
+
+        // Aturan 2: CF = 0.7
+        let minGejala2 = Math.min(lemas, mual, nafsuMakan);
+        let cf2 = minGejala2 * 0.7;
+
+        // Gabungan CF
+        let cfGabung = cf1 + (cf2 * (1 - cf1));
+        let persentase = (cfGabung * 100).toFixed(2);
+
+        // Penentuan Diagnosa (Ambang batas 80%)
+        let diagnosa = "";
+        let kelasDiagnosa = "";
+        if (cfGabung >= 0.80) {
+            diagnosa = "Pasien terkena Tifus";
+            kelasDiagnosa = "diagnosa-tifus";
+        } else {
+            diagnosa = "Bukan Tifus";
+            kelasDiagnosa = "diagnosa-aman";
+        }
+
+        // Tampilkan Hasil
+        document.getElementById('rincian').innerHTML = 
+            "<b>CF Aturan 1:</b> min(" + demam + ", " + sakitPerut + ") × 0.8 = <b>" + cf1.toFixed(4) + "</b><br>" +
+            "<b>CF Aturan 2:</b> min(" + lemas + ", " + mual + ", " + nafsuMakan + ") × 0.7 = <b>" + cf2.toFixed(4) + "</b><br>" +
+            "<b>CF Gabungan:</b> " + cf1.toFixed(4) + " + " + cf2.toFixed(4) + " × (1 - " + cf1.toFixed(4) + ") = <b>" + cfGabung.toFixed(4) + " (" + persentase + "%)</b>";
+
+        let kesimpulanEl = document.getElementById('kesimpulan');
+        kesimpulanEl.innerHTML = "Kesimpulan: <span class='" + kelasDiagnosa + "'>" + diagnosa + "</span>";
+        
+        document.getElementById('hasilBox').style.display = "block";
+    }
+</script>
+
+</body>
+</html>
